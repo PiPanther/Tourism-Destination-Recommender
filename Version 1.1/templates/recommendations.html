@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f7f7f7; /* Light gray background */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff; /* White background for container */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft box shadow */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333; /* Dark gray text color */
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f2f2f2; /* Light gray background for message */
+            margin-bottom: 20px;
+        }
+
+        .message p {
+            margin: 0; /* Remove default margin */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff; /* Blue background for table header */
+            color: #fff; /* White text color for table header */
+        }
+
+        td {
+            background-color: #fff; /* White background for table cells */
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            display: inline-block; /* Display as inline block to adjust padding */
+        }
+
+        .btn-back:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Recommendations</h1>
+        <div class="message">
+            {% if message %}
+                <p>Suggested Places:</p>
+            {% else %}
+                <p>No recommendations found.</p>
+            {% endif %}
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Category</th>
+                    <th>Cost per Person</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for place in message %}
+                    <tr>
+                        <td>{{ place[0] }}</td>
+                        <td>{{ place[1] }}</td>
+                        <td>{{ place[2] }}</td>
+                        <td>{{ place[3] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="/" class="btn-back">Back to Home</a>
+    </div>
+</body>
+
+</html>

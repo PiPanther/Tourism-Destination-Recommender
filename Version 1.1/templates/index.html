@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourism Destination Recommender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for container */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Box shadow for form container */
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .form-container input[type="text"],
+        .form-container input[type="number"],
+        .form-container select {
+            width: calc(100% - 20px); /* Adjusting width to accommodate padding */
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .form-container input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+        }
+
+        .form-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tourism Destination Recommender</h1>
+        <div class="form-container">
+            <form action="/recommendations" method="post">
+                <label for="user_id">Enter User ID:</label>
+                <input type="text" id="user_id" name="user_id"><br><br>
+                <label for="season">Select Season:</label>
+                <select id="season" name="season">
+                    <option value="Summer">Summer</option>
+                    <option value="Winter">Winter</option>
+                    <option value="Monsoon">Monsoon</option>
+                    <option value="Spring">Spring</option>
+                </select><br><br>
+                <label for="budget">Enter Maximum Budget:</label>
+                <input type="text" id="budget" name="budget"><br><br>
+                <input type="submit" value="Get Recommendations">
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
