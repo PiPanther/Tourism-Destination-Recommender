@@ -18,7 +18,6 @@ ratings_data = [
     (22, 11, 13, 4),# Sanjay rated Darjeeling Tea Gardens 4
     (23, 12, 9, 5), # Kavita rated Gateway of India 5
      # Rajesh rated Amer Fort 100
-
 ]
 
 ratings_data1 = [
