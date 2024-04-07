@@ -1,27 +1,29 @@
+from flask import Flask, render_template, request
 import sqlite3
-import tkinter as tk
-from tkinter import messagebox
-from Data import Users, Ratings, Destinations, Travel_History
+from Data import Users, Ratings, Destinations, Travel_History, TravelCosts
 
-# Create tables for users, destinations, ratings, and travel history
-conn = sqlite3.connect('main.db')
+app = Flask(__name__)
+
+# Database connection and setup (similar to your previous code)
+conn = sqlite3.connect('test.db',check_same_thread=False)
 c = conn.cursor()
 
-# Create Users, Destinations, Ratings, and TravelHistory table
 c.execute('''CREATE TABLE IF NOT EXISTS Users (
-             user_id INTEGER PRIMARY KEY,
+             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
              username TEXT,
              age INTEGER,
              location TEXT,
-             category_pref TEXT  -- Add category_pref column
+             category_pref TEXT
              )''')
+
 c.execute('''CREATE TABLE IF NOT EXISTS Destinations (
              destination_id INTEGER PRIMARY KEY,
              name TEXT,
              location TEXT,
              category TEXT,
-             season TEXT  -- Add season column
+             season TEXT
              )''')
+
 c.execute('''CREATE TABLE IF NOT EXISTS Ratings (
              rating_id INTEGER PRIMARY KEY,
              user_id INTEGER,
@@ -30,6 +32,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS Ratings (
              FOREIGN KEY (user_id) REFERENCES Users(user_id),
              FOREIGN KEY (destination_id) REFERENCES Destinations(destination_id)
              )''')
+
 c.execute('''CREATE TABLE IF NOT EXISTS TravelHistory (
              history_id INTEGER PRIMARY KEY,
              user_id INTEGER,
@@ -38,115 +41,132 @@ c.execute('''CREATE TABLE IF NOT EXISTS TravelHistory (
              FOREIGN KEY (destination_id) REFERENCES Destinations(destination_id)
              )''')
 
-# Insert sample data into tables
+c.execute('''CREATE TABLE IF NOT EXISTS TravelCosts (
+             cost_id INTEGER PRIMARY KEY,
+             destination_id INTEGER,
+             cost_per_person REAL,
+             currency TEXT,
+             FOREIGN KEY (destination_id) REFERENCES Destinations(destination_id)
+             )''')
+
+# Insert sample data into tables (Users, Destinations, Ratings, TravelHistory, and TravelCosts)
 c.executemany('''INSERT INTO Users (user_id, username, age, location, category_pref)
                   VALUES (?, ?, ?, ?, ?)''', Users.users_data)
+
 c.executemany('''INSERT INTO Destinations (destination_id, name, location, category, season)
                   VALUES (?, ?, ?, ?, ?)''', Destinations.destinations_data)
+
 c.executemany('''INSERT INTO Ratings (rating_id, user_id, destination_id, rating)
                   VALUES (?, ?, ?, ?)''', Ratings.ratings_data)
+
 c.executemany('''INSERT INTO TravelHistory (history_id, user_id, destination_id)
                   VALUES (?, ?, ?)''', Travel_History.travel_history_data)
 
+c.executemany('''INSERT INTO TravelCosts (cost_id, destination_id, cost_per_person, currency)
+                  VALUES (?, ?, ?, ?)''', TravelCosts.TravelCosts)
 
-def get_recommendations(user_id, selected_season, include_category_pref=True):
-    # Retrieve user's location and travel history
-    print(include_category_pref)
-    c.execute('''SELECT location FROM Users WHERE user_id = ?''', (user_id,))
+# Routes
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+    if request.method == 'POST':
+        try:
+            username = request.form['username']
+            age = int(request.form['age'])
+            location = request.form['location']
+            category_pref = request.form['category_pref']
+
+            # Insert new user into the Users table
+            c.execute('''INSERT INTO Users (username, age, location, category_pref)
+                         VALUES (?, ?, ?, ?)''', (username, age, location, category_pref))
+            conn.commit()  # Commit changes to the database
+
+            # Update Users array in Data directory with the new user data
+            Users.users_data.append((max([user[0] for user in Users.users_data]) + 1, username, age, location, category_pref))
+
+            return render_template('index.html')  # Redirect to the main page
+        except ValueError:
+            return render_template('error.html', message="Please enter valid data.")
+
+    return render_template('registration.html')
+
+@app.route('/recommendations', methods=['GET', 'POST'])
+def recommendations():
+    if request.method == 'POST':
+        try:
+            username = request.form['username']  # Fetch username from form data
+            selected_season = request.form['season']
+            max_budget = float(request.form['budget']) if request.form['budget'] else None
+            sort_by = request.form['sort_by']
+
+            recommendation_message = get_recommendations(username, selected_season, max_budget, sort_by)
+            print(recommendation_message)
+            if recommendation_message == "User not found.":
+                return render_template('error.html', message=recommendation_message)
+            elif recommendation_message:
+                return render_template('recommendations.html', message=recommendation_message)
+            else:
+                return render_template('error.html', message="No recommendations found for the user.")
+        except ValueError:
+            return render_template('error.html', message="Please enter a valid user ID and budget.")
+
+    return render_template('error.html', message="Invalid request method.")
+
+# Define the get_recommendations function with cost feature
+def get_recommendations(username, selected_season, max_budget=None, sort_by='rating'):
+    c.execute('''SELECT location FROM Users WHERE username = ?''', (username,))
     user_location_row = c.fetchone()
     if user_location_row is None:
         return "User not found."
 
     user_location = user_location_row[0]
 
-    # Retrieve user's travel history
-    c.execute('''SELECT destination_id FROM TravelHistory WHERE user_id = ?''', (user_id,))
-    travel_history = [row[0] for row in c.fetchall()]  # List of visited destination_ids
+    c.execute('''SELECT destination_id FROM TravelHistory WHERE user_id = (SELECT user_id FROM Users WHERE username = ?)''', (username,))
+    travel_history = [row[0] for row in c.fetchall()]
 
-    # Include category preference in the SQL query if specified
-    if include_category_pref:
-        c.execute('''SELECT category_pref FROM Users WHERE user_id = ?''', (user_id,))
-        user_category_pref_row = c.fetchone()
-        if user_category_pref_row is None:
-            return "User category preference not found."
-        user_category_pref = user_category_pref_row[0]
-        category_clause = "AND u.category_pref = ?"
-        
-        query_params = (user_location, user_category_pref, selected_season, *travel_history)
+    if selected_season:  # If a specific season is selected
+        season_clause = "AND d.season = ?"
+        query_params = (user_location, selected_season, *travel_history)
+    else:  # If "Any Season" is selected
+        season_clause = ""
+        query_params = (user_location, *travel_history)
+
+    if max_budget is not None:
+        cost_clause = "AND tc.cost_per_person <= ?"
+        query_params += (max_budget,)
     else:
-        category_clause = ""
-        query_params = (user_location, selected_season, *travel_history)  # Adjusted query params here
+        cost_clause = ""
 
-    print(query_params)
-    # Retrieve destinations visited by users with similar preferences and travel history
-    query = f'''SELECT DISTINCT d.name, d.location, d.category
+    sort_column = 'r.rating' if sort_by == 'rating' else 'tc.cost_per_person'
+
+    query = f'''SELECT DISTINCT d.name, d.location, d.category, tc.cost_per_person, r.rating, d.season
                 FROM Destinations d
                 JOIN Ratings r ON d.destination_id = r.destination_id
                 JOIN Users u ON r.user_id = u.user_id
-                WHERE u.location = ? {category_clause} AND d.season = ? AND d.destination_id NOT IN ({",".join("?" for _ in travel_history)})
-                ORDER BY r.rating DESC
-                LIMIT 5'''
+                JOIN TravelCosts tc ON d.destination_id = tc.destination_id
+                WHERE u.location = ? {season_clause} {cost_clause}
+                AND d.destination_id NOT IN ({",".join("?" for _ in travel_history)})
+                ORDER BY {sort_column} DESC
+                LIMIT 10'''
     c.execute(query, query_params)
     recommendations = c.fetchall()
 
-    # Formulate recommendation explanation
-    recommendation_explanation = f"Recommendations based on your location ({user_location}), preferences for {selected_season}, and travel history:\n"
+    recommendation_explanation = f"Recommendations based on your location ({user_location}), preferences for {selected_season if selected_season else 'Any Season'}, and travel history:\n"
     for recommendation in recommendations:
-        recommendation_explanation += f"- Name: {recommendation[0]}, Location: {recommendation[1]}, Category: {recommendation[2]}\n"
+        recommendation_explanation += f"- Name: {recommendation[0]}, Location: {recommendation[1]}, Category: {recommendation[2]}, Cost per Person: {recommendation[3]}\n"
 
-    return recommendation_explanation
-
-
-def show_recommendations():
-    try:
-        user_id = int(entry_user_id.get())
-        selected_season = season_var.get()
-        include_category_pref = include_category_pref_var.get()
-        recommendation_message = get_recommendations(user_id, selected_season, include_category_pref)
-        if recommendation_message:
-            result_text.config(state=tk.NORMAL)
-            result_text.delete(1.0, tk.END)
-            result_text.insert(tk.END, recommendation_message)
-            result_text.config(state=tk.DISABLED)
-        else:
-            messagebox.showinfo("No Recommendations", "No recommendations found for the user.")
-    except ValueError:
-        messagebox.showerror("Invalid Input", "Please enter a valid user ID.")
+    return recommendations
 
 
-# Tkinter GUI setup
-root = tk.Tk()
-root.title("Tourism Destination Recommender")
-root.geometry("600x400")
+# Close database connection when the application exits
+# @app.teardown_appcontext
+# def close_connection(exception):
+#     if conn is not None:
+#         conn.close()
 
-label_user_id = tk.Label(root, text="Enter User ID:")
-label_user_id.pack(pady=10)
-
-entry_user_id = tk.Entry(root, width=20)
-entry_user_id.pack()
-
-label_season = tk.Label(root, text="Select Season:")
-label_season.pack()
-
-season_var = tk.StringVar()
-season_var.set("Winter")  # Default season selection
-season_options = ["Spring", "Summer", "Monsoon", "Winter"]  # Update with your seasons
-season_dropdown = tk.OptionMenu(root, season_var, *season_options)
-season_dropdown.pack()
-
-include_category_pref_var = tk.BooleanVar()
-include_category_pref_var.set(True)  # Default is to include category preference
-include_category_check = tk.Checkbutton(root, text="Include Category Preference", variable=include_category_pref_var)
-include_category_check.pack()
-
-recommend_button = tk.Button(root, text="Get Recommendations", command=show_recommendations)
-recommend_button.pack(pady=10)
-
-result_text = tk.Text(root, height=15, width=60, state=tk.DISABLED)
-result_text.pack(pady=10)
-
-# Keep the GUI running until closed
-root.mainloop()
-
-# Close the database connection when the window is closed
-conn.close()
+if __name__ == '__main__':
+    app.run(debug=True)

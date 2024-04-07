@@ -71,10 +71,11 @@
         <h1>Tourism Destination Recommender</h1>
         <div class="form-container">
             <form action="/recommendations" method="post">
-                <label for="user_id">Enter User ID:</label>
-                <input type="text" id="user_id" name="user_id"><br><br>
+                <label for="username">Enter Your Name:</label>
+                <input type="text" id="username" name="username"><br><br>
                 <label for="season">Select Season:</label>
                 <select id="season" name="season">
+                    <option value="">Any Season</option>
                     <option value="Summer">Summer</option>
                     <option value="Winter">Winter</option>
                     <option value="Monsoon">Monsoon</option>
@@ -82,8 +83,14 @@
                 </select><br><br>
                 <label for="budget">Enter Maximum Budget:</label>
                 <input type="text" id="budget" name="budget"><br><br>
+                <label for="sort_by">Sort By:</label>
+                <select id="sort_by" name="sort_by">
+                    <option value="rating">Rating</option>
+                    <option value="cost">Cost per Person</option>
+                </select><br><br>
                 <input type="submit" value="Get Recommendations">
             </form>
+            <p>If you are not registered, <a href="/registration">click here</a> to register.</p>
         </div>
     </div>
 </body>
