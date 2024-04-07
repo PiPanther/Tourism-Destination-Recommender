@@ -17,36 +17,50 @@
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for container */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            color: #007bff;
         }
 
         .form-container {
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Box shadow for form container */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
 
         .form-container label {
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
+            color: #333;
         }
 
         .form-container input[type="text"],
         .form-container input[type="number"],
         .form-container select {
-            width: calc(100% - 20px); /* Adjusting width to accommodate padding */
+            width: calc(100% - 20px);
             padding: 8px;
             margin-bottom: 10px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007bff' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position-x: calc(100% - 10px);
+            background-position-y: center;
         }
 
         .form-container input[type="submit"] {
@@ -57,11 +71,27 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+            transition: background-color 0.3s ease;
         }
 
         .form-container input[type="submit"]:hover {
             background-color: #0056b3;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -71,7 +101,7 @@
         <h1>Tourism Destination Recommender</h1>
         <div class="form-container">
             <form action="/recommendations" method="post">
-                <label for="username">Enter Your Name:</label>
+                <label for="username">Your Name:</label>
                 <input type="text" id="username" name="username"><br><br>
                 <label for="season">Select Season:</label>
                 <select id="season" name="season">
@@ -81,8 +111,8 @@
                     <option value="Monsoon">Monsoon</option>
                     <option value="Spring">Spring</option>
                 </select><br><br>
-                <label for="budget">Enter Maximum Budget:</label>
-                <input type="text" id="budget" name="budget"><br><br>
+                <label for="budget">Maximum Budget:</label>
+                <input type="text" id="budget" name="budget" placeholder="Leave empty for no budget restriction"><br><br>
                 <label for="sort_by">Sort By:</label>
                 <select id="sort_by" name="sort_by">
                     <option value="rating">Rating</option>

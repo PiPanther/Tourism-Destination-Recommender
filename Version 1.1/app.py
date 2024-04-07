@@ -50,20 +50,20 @@ c.execute('''CREATE TABLE IF NOT EXISTS TravelCosts (
              )''')
 
 # Insert sample data into tables (Users, Destinations, Ratings, TravelHistory, and TravelCosts)
-# c.executemany('''INSERT INTO Users (user_id, username, age, location, category_pref)
-#                   VALUES (?, ?, ?, ?, ?)''', Users.users_data)
+c.executemany('''INSERT INTO Users (user_id, username, age, location, category_pref)
+                  VALUES (?, ?, ?, ?, ?)''', Users.users_data)
 
-# c.executemany('''INSERT INTO Destinations (destination_id, name, location, category, season)
-#                   VALUES (?, ?, ?, ?, ?)''', Destinations.destinations_data)
+c.executemany('''INSERT INTO Destinations (destination_id, name, location, category, season)
+                  VALUES (?, ?, ?, ?, ?)''', Destinations.destinations_data)
 
-# c.executemany('''INSERT INTO Ratings (rating_id, user_id, destination_id, rating)
-#                   VALUES (?, ?, ?, ?)''', Ratings.ratings_data)
+c.executemany('''INSERT INTO Ratings (rating_id, user_id, destination_id, rating)
+                  VALUES (?, ?, ?, ?)''', Ratings.ratings_data)
 
-# c.executemany('''INSERT INTO TravelHistory (history_id, user_id, destination_id)
-#                   VALUES (?, ?, ?)''', Travel_History.travel_history_data)
+c.executemany('''INSERT INTO TravelHistory (history_id, user_id, destination_id)
+                  VALUES (?, ?, ?)''', Travel_History.travel_history_data)
 
-# c.executemany('''INSERT INTO TravelCosts (cost_id, destination_id, cost_per_person, currency)
-#                   VALUES (?, ?, ?, ?)''', TravelCosts.TravelCosts)
+c.executemany('''INSERT INTO TravelCosts (cost_id, destination_id, cost_per_person, currency)
+                  VALUES (?, ?, ?, ?)''', TravelCosts.TravelCosts)
 
 # Routes
 @app.route('/')
